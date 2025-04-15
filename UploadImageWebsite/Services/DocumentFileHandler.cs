@@ -9,6 +9,42 @@ namespace UploadImageWebsite.Services
 			return contentType == "application/pdf" || contentType == "application/msword";
 		}
 
+		public Task<FileResponse> DeleteFilesAsync(string fileName, HttpRequest request)
+		{
+			var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+			if (!Directory.Exists(uploadsPath))
+			{
+				return Task.FromResult(new FileResponse
+				{
+					Success = false,
+					Message = $"Not found.",
+					Files = new List<string> { fileName }
+				});
+			}
+			var filePath = Path.Combine(uploadsPath, fileName);
+
+			if ((fileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) ||
+				 fileName.EndsWith(".doc", StringComparison.OrdinalIgnoreCase) ||
+				 fileName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)) &&
+				System.IO.File.Exists(filePath))
+			{
+				System.IO.File.Delete(filePath);
+
+				return Task.FromResult(new FileResponse
+				{
+					Success = true,
+					Message = $"File '{fileName}' has been deleted.",
+					Files = new List<string> { fileName }
+				});
+			}
+			return Task.FromResult(new FileResponse
+			{
+				Success = false,
+				Message = "File not found or invalid file type.",
+				Files = new List<string>()
+			});
+		}
+
 		public async Task<FileResponse> HandleAsync(IFormFile file, HttpRequest request)
 		{
 			var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
@@ -46,6 +82,55 @@ namespace UploadImageWebsite.Services
 				});
 
 			return Task.FromResult(files);
+		}
+
+		public async Task<FileResponse> UpdateFileAsync(string fileName, IFormFile file, HttpRequest request)
+		{
+			var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+
+			if (!Directory.Exists(uploadsPath))
+			{
+				return new FileResponse
+				{
+					Success = false,
+					Message = $"Upload directory not found.",
+				};
+			}
+
+			var filePath = Path.Combine(uploadsPath, fileName);
+
+			if (!System.IO.File.Exists(filePath))
+			{
+				return new FileResponse
+				{
+					Success = false,
+					Message = $"File '{fileName}' not found.",
+				};
+			}
+
+			try
+			{
+				using (var stream = new FileStream(filePath, FileMode.Create))
+				{
+					await file.CopyToAsync(stream);
+				}
+
+				return new FileResponse
+				{
+					Success = true,
+					FileName = fileName,
+					Message = $"File '{fileName}' has been updated successfully.",
+					Url = $"{request.Scheme}://{request.Host}/uploads/{fileName}"
+				};
+			}
+			catch (Exception ex)
+			{
+				return new FileResponse
+				{
+					Success = false,
+					Message = $"Error updating file: {ex.Message}",
+				};
+			}
 		}
 	}
 }

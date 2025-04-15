@@ -7,7 +7,7 @@ using UploadImageWebsite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "7223";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5109";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.

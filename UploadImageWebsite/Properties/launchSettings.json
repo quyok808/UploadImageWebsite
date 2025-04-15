@@ -17,7 +17,18 @@
       "applicationUrl": "https://0.0.0.0:7223;http://0.0.0.0:5109",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "PORT": "7223"
+        "PORT": "5109"
+      }
+    },
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://0.0.0.0:5109",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "PORT": "5109"
       }
     },
     "IIS Express": {
