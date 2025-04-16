@@ -230,5 +230,34 @@ namespace UploadImageWebsite.Controllers
 			}
 		}
 
+		[HttpDelete("clear-all")]
+		public async Task<IActionResult> DeleteAll()
+		{
+			try
+			{
+				var files = new List<FileResponse>();
+				foreach (var handler in _factory.GetAllHandlers())
+				{
+					// Lấy danh sách file từ handler
+					var handlerFiles = await handler.ListFilesAsync(Request);
+					files.AddRange(handlerFiles);
+				}
+
+				// Xóa tất cả các file
+				foreach (var handler in _factory.GetAllHandlers())
+				{
+					// Gọi phương thức DeleteAllFileAsync để xóa tất cả file
+					await handler.DeleteAllFileAsync(files, Request);
+				}
+
+				// Trả về NoContent nếu xóa thành công
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				// Trả về lỗi 500 nếu có ngoại lệ
+				return StatusCode(500, ex.Message);
+			}
+		}
 	}
 }

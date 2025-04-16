@@ -9,6 +9,33 @@ namespace UploadImageWebsite.Services
 			return contentType == "application/pdf" || contentType == "application/msword";
 		}
 
+		public Task<FileResponse> DeleteAllFileAsync(List<FileResponse> files, HttpRequest request)
+		{
+			var _storagePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+			if (!Directory.Exists(_storagePath))
+			{
+				return Task.FromResult(new FileResponse
+				{
+					Success = false,
+					Message = $"Folder not found.",
+				});
+			}
+			foreach (var file in files)
+			{
+				var filePath = Path.Combine(_storagePath, file.FileName);
+				if (File.Exists(filePath))
+				{
+					File.Delete(filePath);
+				}
+			}
+
+			return Task.FromResult(new FileResponse
+			{
+				Success = true,
+				Message = "All files deleted successfully"
+			});
+		}
+
 		public Task<FileResponse> DeleteFilesAsync(string fileName, HttpRequest request)
 		{
 			var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
@@ -58,8 +85,10 @@ namespace UploadImageWebsite.Services
 
 			return new FileResponse
 			{
+				Success = true,
+				Message = $"File {fileName} has been created",
 				FileName = fileName,
-				Url = $"{request.Scheme}://{request.Host}/uploads/{fileName}"
+				Url = $"{request.Scheme}://{request.Host}/uploads/{fileName}",
 			};
 		}
 
